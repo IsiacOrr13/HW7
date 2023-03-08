@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Base class for generic regressor
 # (this is already complete!)
 class BaseRegressor():
@@ -8,7 +9,9 @@ class BaseRegressor():
     def __init__(self, num_feats, learning_rate=0.01, tol=0.001, max_iter=100, batch_size=10):
 
         # Weights are randomly initialized
+
         self.W = np.random.randn(num_feats + 1).flatten()
+
 
         # Store hyperparameters
         self.lr = learning_rate
@@ -20,22 +23,22 @@ class BaseRegressor():
         # Define empty lists to store losses over training
         self.loss_hist_train = []
         self.loss_hist_val = []
-    
+
     def make_prediction(self, X):
         raise NotImplementedError
-    
+
     def loss_function(self, y_true, y_pred):
         raise NotImplementedError
-        
+
     def calculate_gradient(self, y_true, X):
         raise NotImplementedError
-    
+
     def train_model(self, X_train, y_train, X_val, y_val):
 
         # Padding data with vector of ones for bias term
         X_train = np.hstack([X_train, np.ones((X_train.shape[0], 1))])
         X_val = np.hstack([X_val, np.ones((X_val.shape[0], 1))])
-    
+
         # Defining intitial values for while loop
         prev_update_size = 1
         iteration = 1
@@ -59,7 +62,6 @@ class BaseRegressor():
 
             # Iterate through batches (one of these loops is one epoch of training)
             for X_train, y_train in zip(X_batch, y_batch):
-
                 # Make prediction and calculate loss
                 y_pred = self.make_prediction(X_train)
                 train_loss = self.loss_function(y_train, y_pred)
@@ -68,7 +70,7 @@ class BaseRegressor():
                 # Update weights
                 prev_W = self.W
                 grad = self.calculate_gradient(y_train, X_train)
-                new_W = prev_W - self.lr * grad 
+                new_W = prev_W - self.lr * grad
                 self.W = new_W
 
                 # Save parameter update size
@@ -83,7 +85,7 @@ class BaseRegressor():
 
             # Update iteration
             iteration += 1
-    
+
     def plot_loss_history(self):
 
         # Make sure training has been run
@@ -100,11 +102,15 @@ class BaseRegressor():
         fig.tight_layout()
         plt.show()
 
+    def get_loss(self):
+        return self.loss_hist_train
+
     def reset_model(self):
         self.W = np.random.randn(self.num_feats + 1).flatten()
         self.loss_hist_train = []
         self.loss_hist_val = []
-        
+
+
 # Implement logistic regression as a subclass
 class LogisticRegressor(BaseRegressor):
 
@@ -116,7 +122,7 @@ class LogisticRegressor(BaseRegressor):
             max_iter=max_iter,
             batch_size=batch_size
         )
-    
+
     def make_prediction(self, X) -> np.array:
         """
         TODO: Implement logistic function to get estimates (y_pred) for input X values. The logistic
@@ -129,8 +135,11 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The predicted labels (y_pred) for given X.
         """
-        pass
-    
+        y_pred = []
+        for x in X:
+            y_pred.append(1 / (1 + np.exp(np.dot(-1*self.W, x))))
+        return y_pred
+
     def loss_function(self, y_true, y_pred) -> float:
         """
         TODO: Implement binary cross entropy loss, which assumes that the true labels are either
@@ -143,8 +152,12 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The mean loss (a single number).
         """
-        pass
-        
+        error = 0
+        for index, i in enumerate(y_pred):
+            error += (y_true[index] * np.log10(i)) + ((1 - y_true[index]) * np.log10(1 - i))
+        error = error / (-1)
+        return error
+
     def calculate_gradient(self, y_true, X) -> np.ndarray:
         """
         TODO: Calculate the gradient of the loss function with respect to the given data. This
@@ -157,4 +170,14 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             Vector of gradients.
         """
-        pass
+        y_preds = self.make_prediction(X)
+        grads = []
+        err = y_preds - y_true
+        for feat in range(len(X[0])):
+            gradient = 0
+            for idx, samp in enumerate(X):
+                gradient += (err[idx]*samp[feat])
+            gradient = gradient/len(X)
+            grads.append(gradient)
+        return np.array(grads)
+
