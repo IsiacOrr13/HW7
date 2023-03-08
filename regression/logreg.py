@@ -103,6 +103,7 @@ class BaseRegressor():
         plt.show()
 
     def get_loss(self):
+        # Added this method for quick check of training
         return self.loss_hist_train
 
     def reset_model(self):
@@ -135,6 +136,8 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The predicted labels (y_pred) for given X.
         """
+        # This function iterates through the training data and uses the weights W to make predictions
+        # returns the sigmoidal predictions
         y_pred = []
         for x in X:
             y_pred.append(1 / (1 + np.exp(np.dot(-1*self.W, x))))
@@ -152,6 +155,7 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The mean loss (a single number).
         """
+        # Calculates error of the model
         error = 0
         for index, i in enumerate(y_pred):
             error += (y_true[index] * np.log10(i)) + ((1 - y_true[index]) * np.log10(1 - i))
@@ -170,6 +174,7 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             Vector of gradients.
         """
+        # Calculated the gradients
         y_preds = self.make_prediction(X)
         grads = []
         err = y_preds - y_true

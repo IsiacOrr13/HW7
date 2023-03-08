@@ -25,6 +25,7 @@ lm.train_model(X_t, y_t, X_val, y_val)
 
 
 def test_prediction():
+    # Tests that the prediction is the correct length, and that the prediction is between 1 and 0
     X_t = np.array([[1, 2, 3, 1, 2, 3,1], [1, 2, 2, 1, 2, 3,1], [2, 1, 4, 1, 2, 3,1], [1, 2, 5, 1, 2, 3,1]])
     x = lm.make_prediction(X_t)
     assert len(x) == len(X_t)
@@ -32,16 +33,19 @@ def test_prediction():
     assert min(x) >= 0
 
 def test_loss_function():
+    # Tests a pseudo max and min of the loss function
     assert lm.loss_function([1,1,1], [0.1, 0.1, 0.1]) == 3
     assert lm.loss_function([1,1,1], [.99, .99, .99]) - .013 <= .0001
 
 
 def test_gradient():
+    # Tests that the gradient matches the length of the features
     X_t = np.array([[1, 2, 3, 1, 2, 3, 1], [1, 2, 2, 1, 2, 3, 1], [2, 1, 4, 1, 2, 3, 1], [1, 2, 5, 1, 2, 3, 1]])
     a = lm.calculate_gradient(y_t, X_t)
     assert len(a) == 7
 
 
 def test_training():
+    # Tests that loss goes down over the course of training the model
     b = lm.get_loss()
     assert b[0] >= b[-1]
